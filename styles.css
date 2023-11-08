@@ -1,16 +1,43 @@
 h1 {
 color: #008000;
+font-size: 40px;
 
 }
-h2 {
-    color:darkslategrey;
 
-}
+
+
 em {
     color:rgb(25, 25, 115)
 
 }
 
 html {
-    background-color:rgb(124, 124, 12);
+    background-color:#ADD8E6
 }
+div {
+   
+    margin-left: 85%;
+    margin-top: 1000px;
+
+}
+#a {
+    height: 20px;
+    width: 80%;
+    border: 2px solid black ;
+    padding: 5px;
+    padding-top :10px;
+   
+    margin-left : 46px;
+    
+}
+ #b {
+    margin-right:30px;
+ }
+ h2 {
+    font-size:35px;
+    height: 40px;
+    width: 99%;
+    border: 10px solid black ;
+    padding: 10px;
+    padding-top :10px;
+ }
