@@ -5,21 +5,44 @@ html {
 
 main{
     line-height : 15px;
+    display:flex ;
+    flex-direction: row;
     
 }
 
 #div1{
-    width: 40%;
+    width: 50%;
     height: 100%;
-    background-color: #33ffa8;
+    background-color:#f6ff33; 
     padding-bottom: 100%;
+    margin-right: 0%;
+
+    
 }
     
-#div2{
-    width: 40%;
-    height: 100%;
-    background-color: #33ffa8;
-    padding-bottom: 100%;
+
+header {
+    border: 2px solid black ;
+    background-color: #f6ff33;;
+    text-align: center;
+    font-size:50px;
+    padding:center;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 5%;
+   
 }
- 
+UL{
+    line-height: 30px;
+}
+#div2{
+    width: 100%;
+    height: 100%;
+    background-color:white; 
+    padding-bottom: 100%;
+
+    border: 2px solid black ;
+    margin-top: 0%;
+}
 
