@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Coureurs</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --danger: #dc2626;
+            --danger-dark: #b91c1c;
+            --success: #16a34a;
+            --success-dark: #15803d;
+            --warning: #f59e0b;
+            --warning-dark: #d97706;
+            --neutral-50: #f8fafc;
+            --neutral-100: #f1f5f9;
+            --neutral-200: #e2e8f0;
+            --neutral-300: #cbd5e1;
+            --neutral-700: #334155;
+            --neutral-800: #1e293b;
+            --neutral-900: #0f172a;
+            --radius: 0.5rem;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--neutral-100);
+            color: var(--neutral-800);
+            line-height: 1.6;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Header Styles */
+        .app-header {
+            background-color: white;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--neutral-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-title {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .app-title h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--neutral-900);
+            margin: 0;
+        }
+
+        .app-title p {
+            color: var(--secondary);
+            font-size: 0.95rem;
+        }
+
+        .app-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Main Content Styles */
+        .app-content {
+            padding: 1.5rem 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--neutral-800);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--neutral-200);
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap;
+        }
+
+        thead tr {
+            background-color: var(--neutral-50);
+            border-bottom: 1px solid var(--neutral-200);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--neutral-700);
+            text-transform: none;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--neutral-200);
+            font-size: 0.95rem;
+            color: var(--neutral-800);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background-color: var(--neutral-50);
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-present {
+            background-color: rgba(22, 163, 74, 0.1);
+            color: var(--success);
+        }
+
+        .status-absent {
+            background-color: rgba(220, 38, 38, 0.1);
+            color: var(--danger);
+        }
+
+        /* Button Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            outline: none;
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            border-radius: var(--radius);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--neutral-300);
+            color: var(--neutral-700);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--neutral-100);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: var(--success-dark);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger-dark);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Utils */
+        .text-center {
+            text-align: center;
+        }
+
+        .truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 200px;
+        }
+
+        /* Toast Notification */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 1000;
+        }
+
+        .toast {
+            padding: 1rem;
+            border-radius: var(--radius);
+            background-color: white;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 300px;
+            transform: translateY(10px);
+            opacity: 0;
+            animation: slideIn 0.3s forwards;
+        }
+
+        .toast-success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast-error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast-info {
+            border-left: 4px solid var(--primary);
+        }
+
+        .toast-icon {
+            font-size: 1.25rem;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .toast-message {
+            font-size: 0.85rem;
+            color: var(--neutral-700);
+        }
+
+        .toast-close {
+            cursor: pointer;
+            color: var(--neutral-700);
+            font-size: 1rem;
+        }
+
+        @keyframes slideIn {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Loader */
+        .loader-container {
+            display: flex;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .loader {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--neutral-200);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: 3rem;
+            text-align: center;
+            color: var(--neutral-700);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--neutral-300);
+        }
+
+        .empty-state-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state-message {
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            color: var(--neutral-700);
+        }
+
+        /* Dossard styles */
+        .dossard-available {
+            background-color: rgba(22, 163, 74, 0.1);
+        }
+
+        .dossard-unavailable {
+            background-color: rgba(220, 38, 38, 0.1);
+        }
+        
+        .dossard-row {
+            cursor: pointer;
+        }
+        
+        .dossard-row:hover {
+            background-color: var(--neutral-200) !important;
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--neutral-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--neutral-900);
+        }
+        
+        .modal-close {
+            cursor: pointer;
+            font-size: 1.25rem;
+            color: var(--neutral-700);
+            background: none;
+            border: none;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--neutral-200);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--neutral-200);
+            margin-bottom: 1rem;
+        }
+        
+        .tab {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--neutral-700);
+            border-bottom: 2px solid transparent;
+            transition: var(--transition);
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .app-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            th, td {
+                padding: 0.75rem;
+            }
+
+            .btn {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Section des dossards -->
+        <div class="card">
+            <div class="app-header">
+                <div class="app-title">
+                    <h1>Gestion des Dossards</h1>
+                    <p>Sélection des dossards pour les participants</p>
+                </div>
+                <div class="app-actions">
+                    <button class="btn btn-outline" id="refresh-dossards-btn">
+                        <i class="fas fa-sync-alt"></i>
+                        Actualiser
+                    </button>
+                </div>
+            </div>
+
+            <div class="app-content">
+                <div class="section-header">
+                    <h2 class="section-title">Liste des dossards</h2>
+                    <div class="count" id="dossards-count"></div>
+                </div>
+
+                <div class="table-container">
+                    <table id="dossards-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Numéro</th>
+                                <th>UID</th>
+                                <th>Disponibilité</th>
+                                <th>Heure de départ</th>
+                                <th>Heure d'arrivée</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dossards-body">
+                            <!-- Le contenu sera chargé dynamiquement -->
+                        </tbody>
+                    </table>
+                    <div id="dossards-loader" class="loader-container">
+                        <div class="loader"></div>
+                    </div>
+                    <div id="dossards-empty" class="empty-state" style="display: none;">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-hashtag"></i>
+                        </div>
+                        <h3 class="empty-state-title">Aucun dossard trouvé</h3>
+                        <p class="empty-state-message">Il n'y a aucun dossard enregistré pour le moment.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section des coureurs -->
+        <div class="card">
+            <div class="app-header">
+                <div class="app-title">
+                    <h1>Gestion des Coureurs</h1>
+                    <p>Système de gestion des participants aux événements sportifs</p>
+                </div>
+                <div class="app-actions">
+                    <button class="btn btn-outline" id="refresh-coureurs-btn">
+                        <i class="fas fa-sync-alt"></i>
+                        Actualiser
+                    </button>
+                </div>
+            </div>
+
+            <div class="app-content">
+                <div class="section-header">
+                    <h2 class="section-title">Liste des participants</h2>
+                    <div class="count" id="coureurs-count"></div>
+                </div>
+
+                <div class="table-container">
+                    <table id="coureurs-table">
+                        <thead>
+                            <tr>
+                                <th>Dossard</th>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Date de naissance</th>
+                                <th>Email</th>
+                                <th>Téléphone</th>
+                                <th>Accord Photo</th>
+                                <th>Présence</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coureurs-body">
+                            <!-- Le contenu sera chargé dynamiquement -->
+                        </tbody>
+                    </table>
+                    <div id="coureurs-loader" class="loader-container">
+                        <div class="loader"></div>
+                    </div>
+                    <div id="coureurs-empty" class="empty-state" style="display: none;">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-running"></i>
+                        </div>
+                        <h3 class="empty-state-title">Aucun coureur trouvé</h3>
+                        <p class="empty-state-message">Il n'y a aucun coureur enregistré pour le moment.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour attribuer un dossard -->
+    <div class="modal-overlay" id="assign-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Attribuer un dossard</h3>
+                <button class="modal-close" id="close-assign-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <div class="tab active" data-tab="tab-available">Dossards disponibles</div>
+                    <div class="tab" data-tab="tab-all">Tous les dossards</div>
+                </div>
+                
+                <div class="tab-content active" id="tab-available">
+                    <div class="table-container">
+                        <table id="modal-dossards-available-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Numéro</th>
+                                    <th>Disponibilité</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modal-dossards-available-body">
+                                <!-- Le contenu sera chargé dynamiquement -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="tab-all">
+                    <div class="table-container">
+                        <table id="modal-dossards-all-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Numéro</th>
+                                    <th>Disponibilité</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modal-dossards-all-body">
+                                <!-- Le contenu sera chargé dynamiquement -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <input type="hidden" id="current-coureur-id">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancel-assign">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script>
+        const API_BASE_URL = "http://127.0.0.1:8080/api";
+        let coureursData = [];
+        let dossardsData = [];
+        let currentCoureurId = null;
+
+        // DOM Elements
+        const coureursBody = document.getElementById("coureurs-body");
+        const coureursCount = document.getElementById("coureurs-count");
+        const coureursLoader = document.getElementById("coureurs-loader");
+        const coureursEmpty = document.getElementById("coureurs-empty");
+        const refreshCoureursBtn = document.getElementById("refresh-coureurs-btn");
+        
+        const dossardsBody = document.getElementById("dossards-body");
+        const dossardsCount = document.getElementById("dossards-count");
+        const dossardsLoader = document.getElementById("dossards-loader");
+        const dossardsEmpty = document.getElementById("dossards-empty");
+        const refreshDossardsBtn = document.getElementById("refresh-dossards-btn");
+        
+        const assignModal = document.getElementById("assign-modal");
+        const closeAssignModal = document.getElementById("close-assign-modal");
+        const cancelAssignBtn = document.getElementById("cancel-assign");
+        const modalDossardsAvailableBody = document.getElementById("modal-dossards-available-body");
+        const modalDossardsAllBody = document.getElementById("modal-dossards-all-body");
+        
+        const toastContainer = document.getElementById("toast-container");
+        
+        // Tabs
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // Event Listeners
+        document.addEventListener("DOMContentLoaded", initialize);
+        refreshCoureursBtn.addEventListener("click", fetchCoureurs);
+        refreshDossardsBtn.addEventListener("click", fetchDossards);
+        closeAssignModal.addEventListener("click", closeModal);
+        cancelAssignBtn.addEventListener("click", closeModal);
+        
+        // Tab event listeners
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Activate corresponding content
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        function initialize() {
+            fetchCoureurs();
+            fetchDossards();
+        }
+
+        function fetchCoureurs() {
+            showLoader(coureursLoader, coureursBody);
+            fetch(`${API_BASE_URL}/coureurs`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Erreur lors de la récupération des données des coureurs.");
+                    return response.json();
+                })
+                .then(data => {
+                    coureursData = data;
+                    renderCoureursTable();
+                    updateCoureursCount();
+                    showNotification("Succès", "Les données des coureurs ont été chargées avec succès.", "success");
+                })
+                .catch(error => {
+                    console.error("Erreur de récupération des coureurs :", error);
+                    showNotification("Erreur", "Impossible de charger les données des coureurs. Veuillez réessayer.", "error");
+                })
+                .finally(() => {
+                    hideLoader(coureursLoader, coureursBody);
+                });
+        }
+        
+        function fetchDossards() {
+            showLoader(dossardsLoader, dossardsBody);
+            fetch(`${API_BASE_URL}/dossards`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Erreur lors de la récupération des données des dossards.");
+                    return response.json();
+                })
+                .then(data => {
+                    dossardsData = data;
+                    renderDossardsTable();
+                    updateDossardsCount();
+                    showNotification("Succès", "Les données des dossards ont été chargées avec succès.", "success");
+                })
+                .catch(error => {
+                    console.error("Erreur de récupération des dossards :", error);
+                    showNotification("Erreur", "Impossible de charger les données des dossards. Veuillez réessayer.", "error");
+                })
+                .finally(() => {
+                    hideLoader(dossardsLoader, dossardsBody);
+                });
+        }
+
+        function sendCoureurToDatabase(coureur) {
+            showNotification("En cours", "Mise à jour des données du coureur...", "info");
+            fetch(`${API_BASE_URL}/coureurs/${coureur.idcoureur}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(coureur),
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error("Erreur lors de l'envoi des données du coureur.");
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Données du coureur mises à jour avec succès :", data);
+                    showNotification("Succès", `Statut du coureur ${coureur.nomcoureur} mis à jour avec succès.`, "success");
+                })
+                .catch(error => {
+                    console.error("Erreur lors de l'envoi des données du coureur :", error);
+                    showNotification("Erreur", "Échec de la mise à jour du coureur. Veuillez réessayer.", "error");
+                });
+        }
+        
+        function sendDossardToDatabase(dossard) {
+    showNotification("En cours", "Mise à jour des données du dossard...", "info");
+    fetch(`${API_BASE_URL}/dossards/${dossard.iddossard}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ disponible: dossard.disponible }),
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Erreur lors de l'envoi des données du dossard.");
+        return response.json();
+    })
+    .then(data => {
+        console.log("Données du dossard mises à jour avec succès :", data);
+        showNotification("Succès", `Statut du dossard n°${dossard.numero} mis à jour avec succès.`, "success");
+    })
+    .catch(error => {
+        console.error("Erreur lors de l'envoi des données du dossard :", error);
+        showNotification("Erreur", "Échec de la mise à jour du dossard. Veuillez réessayer.", "error");
+    });
+}
+        
+function assignDossardToCoureur(dossardId, coureurId) {
+    console.log("Assigning dossard:", dossardId, "to coureur:", coureurId); // Ajoutez ce log
+    fetch(`${API_BASE_URL}/assign-dossard`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            dossardId: dossardId,
+            coureurId: coureurId
+        }),
+    })
+    .then(response => {
+        console.log("API response:", response); // Ajoutez ce log
+        if (!response.ok) throw new Error("Erreur lors de l'attribution du dossard.");
+        return response.json();
+    })
+    .then(data => {
+        console.log("Dossard attribué avec succès :", data);
+        fetchCoureurs();
+        fetchDossards();
+        closeModal();
+        showNotification("Succès", "Dossard attribué avec succès.", "success");
+    })
+    .catch(error => {
+        console.error("Erreur lors de l'attribution du dossard :", error);
+        showNotification("Erreur", "Échec de l'attribution du dossard. Veuillez réessayer.", "error");
+    });
+}
+
+
+        function renderCoureursTable() {
+            if (coureursData.length === 0) {
+                showEmptyState(coureursEmpty, "coureurs-table");
+                return;
+            }
+            
+            hideEmptyState(coureursEmpty, "coureurs-table");
+            coureursBody.innerHTML = "";
+            
+            coureursData.forEach((coureur, index) => {
+                const row = document.createElement("tr");
+                
+                // Format de la date pour l'affichage
+                const dateObj = new Date(coureur.datenaissance);
+                const formattedDate = dateObj.toLocaleDateString('fr-FR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+                
+                // Définir le statut de présence en fonction de la valeur dans la base de données
+                const presentValue = coureur.present;
+                const statusClass = presentValue ? 'status-present' : 'status-absent';
+                const statusIcon = presentValue ? 'fa-check-circle' : 'fa-times-circle';
+                const statusText = presentValue ? 'Présent' : 'Absent';
+                
+                // Affichage du numéro de dossard (vide ou avec le numéro assigné)
+                const dossardInfo = "<span class='btn btn-outline' onclick='openAssignModal(" + coureur.idcoureur + ")'>" +
+                                    "<i class='fas fa-hashtag'></i> " +
+                                    (coureur.iddossard ? "Dossard " + getDossardNumberById(coureur.iddossard) : "Assigner un dossard") +
+                                    "</span>";
+                
+                row.innerHTML = `
+                    <td>${dossardInfo}</td>
+                    <td><a href="#" onclick="openCoureurDetail(${index})">${coureur.nomcoureur}</a></td>
+                    <td>${coureur.prenomcoureur}</td>
+                    <td>${formattedDate}</td>
+                    <td class="truncate" title="${coureur.email}">${coureur.email}</td>
+                    <td>${coureur.telephone}</td>
+                    <td>${coureur.accordphoto ? 
+                          '<span class="status status-present"><i class="fas fa-check"></i> Oui</span>' : 
+                          '<span class="status status-absent"><i class="fas fa-times"></i> Non</span>'}</td>
+                    <td>
+                        <span class="status ${statusClass}">
+                            <i class="fas ${statusIcon}"></i>
+                            ${statusText}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="btn btn-success btn-icon" onclick="updatePresence(${index}, true)" title="Marquer comme présent">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="btn btn-danger btn-icon" onclick="updatePresence(${index}, false)" title="Marquer comme absent">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                coureursBody.appendChild(row);
+            });
+        }
+        
+        function renderDossardsTable() {
+            if (dossardsData.length === 0) {
+                showEmptyState(dossardsEmpty, "dossards-table");
+                return;
+            }
+            
+            hideEmptyState(dossardsEmpty, "dossards-table");
+            dossardsBody.innerHTML = "";
+            
+            dossardsData.forEach((dossard, index) => {
+                const row = document.createElement("tr");
+                
+                // Définir la classe de la ligne en fonction de la disponibilité
+                row.className = dossard.disponible ? 'dossard-available dossard-row' : 'dossard-unavailable dossard-row';
+                
+                // Format des dates
+                const departDate = dossard.heure_depart ? new Date(dossard.heure_depart) : null;
+                const arriveeDate = dossard.heure_arrivee ? new Date(dossard.heure_arrivee) : null;
+                
+                const formattedDepart = departDate ? formatDateTime(departDate) : '-';
+                const formattedArrivee = arriveeDate ? formatDateTime(arriveeDate) : '-';
+                
+                // Texte de disponibilité
+                const disponibiliteText = dossard.disponible ? 
+                    '<span class="status status-present"><i class="fas fa-check"></i> Disponible</span>' : 
+                    '<span class="status status-absent"><i class="fas fa-times"></i> Utilisé</span>';
+                
+                row.innerHTML = `
+                    <td>${dossard.iddossard}</td>
+                    <td>${dossard.numero}</td>
+                    <td>${dossard.uid || '-'}</td>
+                    <td>${disponibiliteText}</td>
+                    <td>${formattedDepart}</td>
+                    <td>${formattedArrivee}</td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="btn ${dossard.disponible ? 'btn-primary' : 'btn-outline'} btn-icon" onclick="toggleDossardAvailability(${index}, ${!dossard.disponible})" title="${dossard.disponible ? 'Marquer comme utilisé' : 'Marquer comme disponible'}">
+                                <i class="fas ${dossard.disponible ? 'fa-lock' : 'fa-unlock'}"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                dossardsBody.appendChild(row);
+            });
+        }
+        
+        function renderModalDossards() {
+            // Remplir l'onglet dossards disponibles
+            modalDossardsAvailableBody.innerHTML = "";
+            const availableDossards = dossardsData.filter(dossard => dossard.disponible);
+            
+            availableDossards.forEach(dossard => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${dossard.iddossard}</td>
+                    <td>${dossard.numero}</td>
+                    <td><span class="status status-present"><i class="fas fa-check"></i> Disponible</span></td>
+                    <td>
+                        <button class="btn btn-primary btn-icon" onclick="confirmAssignDossard(${dossard.iddossard})" title="Assigner ce dossard">
+                            <i class="fas fa-check"></i> Assigner
+                        </button>
+                    </td>
+                `;
+                modalDossardsAvailableBody.appendChild(row);
+            });
+            
+            // Remplir l'onglet tous les dossards
+            modalDossardsAllBody.innerHTML = "";
+            
+            dossardsData.forEach(dossard => {
+                const disponibiliteText = dossard.disponible ? 
+                    '<span class="status status-present"><i class="fas fa-check"></i> Disponible</span>' : 
+                    '<span class="status status-absent"><i class="fas fa-times"></i> Utilisé</span>';
+                
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${dossard.iddossard}</td>
+                    <td>${dossard.numero}</td>
+                    <td>${disponibiliteText}</td>
+                    <td>
+                        <button class="btn btn-primary btn-icon" onclick="confirmAssignDossard(${dossard.iddossard})" 
+                            title="Assigner ce dossard" ${!dossard.disponible ? 'disabled' : ''}>
+                            <i class="fas fa-check"></i> Assigner
+                        </button>
+                    </td>
+                `;
+                modalDossardsAllBody.appendChild(row);
+            });
+        }
+
+        function getDossardNumberById(iddossard) {
+            const dossard = dossardsData.find(d => d.iddossard === iddossard);
+            return dossard ? dossard.numero : "N/A";
+        }
+        
+        function formatDateTime(date) {
+            return date.toLocaleString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        function updatePresence(index, status) {
+            // Mise à jour de la valeur dans notre tableau local
+            coureursData[index].present = status;
+            
+            // Envoi des données mises à jour à la base de données
+            sendCoureurToDatabase(coureursData[index]);
+            
+            // Mise à jour de l'affichage
+            renderCoureursTable();
+        }
+        
+        function toggleDossardAvailability(index, status) {
+            // Mise à jour de la valeur dans notre tableau local
+            dossardsData[index].disponible = status;
+            
+            // Envoi des données mises à jour à la base de données
+            sendDossardToDatabase(dossardsData[index]);
+            
+            // Mise à jour de l'affichage
+            renderDossardsTable();
+        }
+        
+        function openAssignModal(coureurId) {
+            currentCoureurId = coureurId;
+            document.getElementById("current-coureur-id").value = coureurId;
+            
+            // Remplir la modal avec les dossards disponibles
+            renderModalDossards();
+            
+            // Afficher la modal
+            assignModal.classList.add("active");
+        }
+        
+        function closeModal() {
+            assignModal.classList.remove("active");
+        }
+        
+        function confirmAssignDossard(dossardId) {
+            const coureurId = document.getElementById("current-coureur-id").value;
+            
+            // Appel de la fonction pour assigner le dossard au coureur
+            assignDossardToCoureur(dossardId, coureurId);
+        }
+
+        function updateCoureursCount() {
+            coureursCount.textContent = `${coureursData.length} participant${coureursData.length > 1 ? 's' : ''}`;
+        }
+        
+        function updateDossardsCount() {
+            const availableDossards = dossardsData.filter(dossard => dossard.disponible).length;
+            dossardsCount.textContent = `${dossardsData.length} dossard${dossardsData.length > 1 ? 's' : ''} (${availableDossards} disponible${availableDossards > 1 ? 's' : ''})`;
+        }
+
+        function showLoader(loader, content) {
+            loader.style.display = "flex";
+            content.style.display = "none";
+        }
+
+        function hideLoader(loader, content) {
+            loader.style.display = "none";
+            content.style.display = "";
+        }
+
+        function showEmptyState(emptyState, tableId) {
+            emptyState.style.display = "block";
+            document.getElementById(tableId).style.display = "none";
+        }
+
+        function hideEmptyState(emptyState, tableId) {
+            emptyState.style.display = "none";
+            document.getElementById(tableId).style.display = "table";
+        }
+
+        function showNotification(title, message, type = "info") {
+            const toast = document.createElement("div");
+            toast.className = `toast toast-${type}`;
+            
+            let iconClass = "fa-info-circle";
+            if (type === "success") iconClass = "fa-check-circle";
+            if (type === "error") iconClass = "fa-exclamation-circle";
+            
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="fas ${iconClass}"></i>
+                </div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <div class="toast-close">
+                    <i class="fas fa-times"></i>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Close toast on click
+            toast.querySelector(".toast-close").addEventListener("click", () => {
+                toast.remove();
+            });
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.style.opacity = "0";
+                toast.style.transform = "translateY(10px)";
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        // Expose functions to global scope for onclick handlers
+        window.updatePresence = updatePresence;
+        window.toggleDossardAvailability = toggleDossardAvailability;
+        window.openAssignModal = openAssignModal;
+        window.confirmAssignDossard = confirmAssignDossard;
+    
+    
+   function openCoureurDetail(index) {
+    const coureur = coureursData[index];
+    const detailWindow = window.open("", "_blank", "width=650,height=800"); // Augmenté la hauteur
+    const formattedDate = new Date(coureur.datenaissance).toLocaleDateString('fr-FR');
+    const photoUrl = coureur.photoUrl || 'https://via.placeholder.com/150/2563eb/ffffff?text=Coureur';
+    
+    // Récupération des courses du coureur (à adapter selon votre structure)
+    const coureurCourses = getCoursesForCoureur(coureur.id); // Fonction à implémenter
+    
+    detailWindow.document.write(`
+        <html>
+        <head>
+            <title>Profil de ${coureur.prenomcoureur} ${coureur.nomcoureur}</title>
+            <meta charset="UTF-8">
+            <style>
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+                
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    min-height: 100vh;
+                    padding: 20px;
+                    color: #333;
+                }
+                
+                .container {
+                    max-width: 500px;
+                    margin: 0 auto;
+                    background: #ffffff;
+                    border-radius: 20px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                    overflow: hidden;
+                    animation: slideIn 0.5s ease-out;
+                }
+                
+                @keyframes slideIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                
+                .header {
+                    background: linear-gradient(135deg, #2563eb, #3b82f6);
+                    padding: 30px 20px;
+                    text-align: center;
+                    color: white;
+                    position: relative;
+                }
+                
+                .header::before {
+                    content: '';
+                    position: absolute;
+                    bottom: -10px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 0;
+                    height: 0;
+                    border-left: 20px solid transparent;
+                    border-right: 20px solid transparent;
+                    border-top: 20px solid #3b82f6;
+                }
+                
+                .photo {
+                    width: 120px;
+                    height: 120px;
+                    border-radius: 50%;
+                    border: 4px solid #ffffff;
+                    object-fit: cover;
+                    margin-bottom: 15px;
+                    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+                    transition: transform 0.3s ease;
+                }
+                
+                .photo:hover {
+                    transform: scale(1.05);
+                }
+                
+                .name {
+                    font-size: 24px;
+                    font-weight: 700;
+                    margin-bottom: 5px;
+                    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                }
+                
+                .subtitle {
+                    font-size: 14px;
+                    opacity: 0.9;
+                    font-weight: 300;
+                }
+                
+                .content {
+                    padding: 30px;
+                }
+                
+                .section-title {
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: #1e293b;
+                    margin-bottom: 15px;
+                    padding-bottom: 8px;
+                    border-bottom: 2px solid #e2e8f0;
+                    display: flex;
+                    align-items: center;
+                }
+                
+                .section-title .icon {
+                    margin-right: 10px;
+                    font-size: 20px;
+                }
+                
+                .info-grid {
+                    display: grid;
+                    gap: 20px;
+                    margin-bottom: 30px;
+                }
+                
+                .info-item {
+                    display: flex;
+                    align-items: center;
+                    padding: 15px;
+                    background: #f8fafc;
+                    border-radius: 12px;
+                    border-left: 4px solid #2563eb;
+                    transition: all 0.3s ease;
+                }
+                
+                .info-item:hover {
+                    background: #e2e8f0;
+                    transform: translateX(5px);
+                }
+                
+                .info-icon {
+                    width: 24px;
+                    height: 24px;
+                    margin-right: 15px;
+                    color: #2563eb;
+                    font-size: 20px;
+                }
+                
+                .info-content {
+                    flex: 1;
+                }
+                
+                .info-label {
+                    font-size: 12px;
+                    color: #64748b;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    margin-bottom: 2px;
+                }
+                
+                .info-value {
+                    font-size: 16px;
+                    font-weight: 500;
+                    color: #1e293b;
+                }
+                
+                .status-badge {
+                    display: inline-block;
+                    padding: 4px 12px;
+                    border-radius: 20px;
+                    font-size: 12px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                }
+                
+                .status-present {
+                    background: #dcfce7;
+                    color: #16a34a;
+                }
+                
+                .status-absent {
+                    background: #fef2f2;
+                    color: #dc2626;
+                }
+                
+                .status-yes {
+                    background: #dbeafe;
+                    color: #2563eb;
+                }
+                
+                .status-no {
+                    background: #f1f5f9;
+                    color: #64748b;
+                }
+                
+                /* Styles pour les courses */
+                .courses-section {
+                    margin-top: 30px;
+                }
+                
+                .course-card {
+                    background: #ffffff;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 12px;
+                    padding: 15px;
+                    margin-bottom: 12px;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                }
+                
+                .course-card:hover {
+                    border-color: #2563eb;
+                    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+                    transform: translateY(-2px);
+                }
+                
+                .course-name {
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: #1e293b;
+                    margin-bottom: 8px;
+                }
+                
+                .course-details {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                }
+                
+                .course-info {
+                    font-size: 13px;
+                    color: #64748b;
+                }
+                
+                .course-status {
+                    padding: 3px 8px;
+                    border-radius: 12px;
+                    font-size: 11px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                }
+                
+                .status-inscrit {
+                    background: #dcfce7;
+                    color: #16a34a;
+                }
+                
+                .status-attente {
+                    background: #fef3c7;
+                    color: #d97706;
+                }
+                
+                .status-annule {
+                    background: #fef2f2;
+                    color: #dc2626;
+                }
+                
+                .no-courses {
+                    text-align: center;
+                    padding: 30px;
+                    color: #64748b;
+                    font-style: italic;
+                }
+                
+                .close-btn {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: rgba(255,255,255,0.9);
+                    border: none;
+                    border-radius: 50%;
+                    width: 40px;
+                    height: 40px;
+                    cursor: pointer;
+                    font-size: 20px;
+                    color: #64748b;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    transition: all 0.3s ease;
+                }
+                
+                .close-btn:hover {
+                    background: #ef4444;
+                    color: white;
+                    transform: rotate(90deg);
+                }
+                
+                @media (max-width: 480px) {
+                    .container {
+                        margin: 10px;
+                        border-radius: 15px;
+                    }
+                    
+                    .header {
+                        padding: 20px 15px;
+                    }
+                    
+                    .content {
+                        padding: 20px 15px;
+                    }
+                    
+                    .photo {
+                        width: 100px;
+                        height: 100px;
+                    }
+                    
+                    .name {
+                        font-size: 20px;
+                    }
+                    
+                    .course-details {
+                        flex-direction: column;
+                        align-items: flex-start;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <button class="close-btn" onclick="window.close()" title="Fermer">&times;</button>
+            
+            <div class="container">
+                <div class="header">
+                    <img class="photo" src="${photoUrl}" alt="Photo de ${coureur.prenomcoureur}" />
+                    <div class="name">${coureur.prenomcoureur} ${coureur.nomcoureur}</div>
+                    <div class="subtitle">Profil du coureur</div>
+                </div>
+                
+                <div class="content">
+                    <h3 class="section-title">
+                        <span class="icon">👤</span>
+                        Informations personnelles
+                    </h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-icon">🎂</div>
+                            <div class="info-content">
+                                <div class="info-label">Date de naissance</div>
+                                <div class="info-value">${formattedDate}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-icon">📧</div>
+                            <div class="info-content">
+                                <div class="info-label">Email</div>
+                                <div class="info-value">${coureur.email}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-icon">📱</div>
+                            <div class="info-content">
+                                <div class="info-label">Téléphone</div>
+                                <div class="info-value">${coureur.telephone}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-icon">📷</div>
+                            <div class="info-content">
+                                <div class="info-label">Accord Photo</div>
+                                <div class="info-value">
+                                    <span class="status-badge ${coureur.accordphoto ? 'status-yes' : 'status-no'}">
+                                        ${coureur.accordphoto ? 'Accordé' : 'Refusé'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-icon">✅</div>
+                            <div class="info-content">
+                                <div class="info-label">Présence</div>
+                                <div class="info-value">
+                                    <span class="status-badge ${coureur.present ? 'status-present' : 'status-absent'}">
+                                        ${coureur.present ? 'Présent' : 'Absent'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-icon">🏃</div>
+                            <div class="info-content">
+                                <div class="info-label">Dossard</div>
+                                <div class="info-value">${coureur.iddossard ? getDossardNumberById(coureur.iddossard) : 'Non attribué'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Section Courses -->
+                    <div class="courses-section">
+                        <h3 class="section-title">
+                            <span class="icon">🏁</span>
+                            Courses inscrites
+                        </h3>
+                        ${generateCoursesHTML(coureurCourses)}
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+    `);
+    
+    detailWindow.document.close();
+}
+
+// Fonction pour générer le HTML des courses (à adapter selon vos données)
+function generateCoursesHTML(courses) {
+    if (!courses || courses.length === 0) {
+        return `
+            <div class="no-courses">
+                <p>Aucune course inscrite pour le moment</p>
+            </div>
+        `;
+    }
+    
+    return courses.map(course => `
+        <div class="course-card">
+            <div class="course-name">${course.nom}</div>
+            <div class="course-details">
+                <div class="course-info">
+                    📅 ${new Date(course.date).toLocaleDateString('fr-FR')} • 
+                    📏 ${course.distance || 'N/A'} • 
+                    🕐 ${course.heure || 'N/A'}
+                </div>
+                <span class="course-status status-${course.statut.toLowerCase()}">
+                    ${course.statut}
+                </span>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Fonction pour récupérer les courses d'un coureur (à implémenter selon votre BDD)
+function getCoursesForCoureur(coureurId) {
+    // Exemple de structure - à adapter selon votre base de données
+    // Cette fonction devrait faire une requête pour récupérer les courses
+    // auxquelles le coureur est inscrit
+    
+    // Exemple de retour :
+    /*
+    return [
+        {
+            id: 1,
+            nom: "10km de la ville",
+            date: "2024-06-15",
+            heure: "09:00",
+            distance: "10km",
+            statut: "Inscrit"
+        },
+        {
+            id: 2,
+            nom: "Semi-marathon",
+            date: "2024-07-20",
+            heure: "08:30",
+            distance: "21km",
+            statut: "Attente"
+        }
+    ];
+    */
+    
+    // Pour l'instant, retournez un tableau vide ou des données de test
+    return [];
+}
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+    
+    </script>
+
+
+
+
+
+</body>
+</html>
